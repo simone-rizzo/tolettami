@@ -8,7 +8,7 @@
       href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800"
     />
 
-    <title>Stitch Design</title>
+    <title>Sign Up - Pet Grooming</title>
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -41,26 +41,38 @@
               <a class="text-[#111714] text-sm font-medium leading-normal" href="#">About Us</a>
             </div>
             <div class="flex gap-2" id="header-auth-buttons">
-              <button
-                id="login-button-header"
-                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]"
-              >
-                <span class="truncate">Log In</span>
-              </button>
               <a
-                id="signup-button-header"
-                href="register.html"
+                id="login-button-header"
+                href="login.html"
                 class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f4f2] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]"
               >
-                <span class="truncate">Sign Up</span>
+                <span class="truncate">Log In</span>
               </a>
+              <button
+                id="signup-button-header"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Sign Up</span>
+              </button>
             </div>
           </div>
         </header>
         <div class="px-40 flex flex-1 justify-center py-5">
           <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
-            <h2 class="text-[#111714] tracking-light text-[28px] font-bold leading-tight px-4 text-center pb-3 pt-5">Welcome back</h2>
-            <form id="login-form">
+            <h2 class="text-[#111714] tracking-light text-[28px] font-bold leading-tight px-4 text-center pb-3 pt-5">Create your account</h2>
+            <form id="register-form">
+              <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+                <label class="flex flex-col min-w-40 flex-1">
+                  <p class="text-[#111714] text-base font-medium leading-normal pb-2">Name</p>
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your name"
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#111714] focus:outline-0 focus:ring-0 border border-[#dce5df] bg-white focus:border-[#dce5df] h-14 placeholder:text-[#648772] p-[15px] text-base font-normal leading-normal"
+                    required
+                  />
+                </label>
+              </div>
               <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
                 <label class="flex flex-col min-w-40 flex-1">
                   <p class="text-[#111714] text-base font-medium leading-normal pb-2">Email</p>
@@ -85,19 +97,18 @@
                   />
                 </label>
               </div>
-              <p class="text-[#648772] text-sm font-normal leading-normal pb-3 pt-1 px-4 underline">Forgot password?</p>
               <div id="error-message" class="px-4 py-2 text-red-600 text-sm"></div>
               <div class="flex px-4 py-3">
                 <button
                   type="submit"
                   class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 flex-1 bg-[#38e07b] hover:bg-green-500 text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]"
                 >
-                  <span class="truncate">Log In</span>
+                  <span class="truncate">Sign Up</span>
                 </button>
               </div>
             </form>
             <p class="text-[#648772] text-sm font-normal leading-normal pb-3 pt-1 px-4 text-center">
-              Don't have an account? <a href="register.html" class="underline">Sign up</a>
+              Already have an account? <a href="login.html" class="underline">Log in</a>
             </p>
           </div>
         </div>
@@ -105,45 +116,49 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const errorMessageDiv = document.getElementById('error-message');
 
-        loginForm.addEventListener('submit', async (event) => {
+        registerForm.addEventListener('submit', async (event) => {
           event.preventDefault();
           errorMessageDiv.textContent = ''; // Clear previous errors
 
+          const name = nameInput.value;
           const email = emailInput.value;
           const password = passwordInput.value;
 
-          if (!email || !password) {
-            errorMessageDiv.textContent = 'Please enter both email and password.';
+          if (!name || !email || !password) {
+            errorMessageDiv.textContent = 'Please fill in all fields.';
             return;
           }
 
           try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/register', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ email, password }),
+              body: JSON.stringify({ name, email, password }),
             });
 
             const responseData = await response.json();
 
-            if (response.ok) { // Status 200-299
-              // Store placeholder token and user info
-              localStorage.setItem('session_token', responseData.user.id); // Using user ID as a temporary token
-              localStorage.setItem('user', JSON.stringify(responseData.user));
-              window.location.href = 'landing_page.html';
+            if (response.ok) { // Status 201
+              // Instead of alert, use the messageDiv for success before redirect
+              errorMessageDiv.textContent = 'Registration successful! Redirecting to login...';
+              errorMessageDiv.className = 'text-green-700 bg-green-100 border border-green-400 p-3 rounded-md my-2';
+              setTimeout(() => {
+                window.location.href = 'login.html';
+              }, 2000); // Delay redirect to allow user to see message
             } else {
-              errorMessageDiv.textContent = responseData.message || 'Invalid email or password.';
+              errorMessageDiv.textContent = responseData.message || 'Registration failed.';
               errorMessageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2';
             }
           } catch (error) {
-            console.error('Login error:', error);
+            console.error('Registration error:', error);
             errorMessageDiv.textContent = 'An error occurred. Please try again.';
             errorMessageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2';
           }

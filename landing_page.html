@@ -23,7 +23,7 @@
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor"></path>
               </svg>
             </div>
-            <h2 class="text-[#111714] text-lg font-bold leading-tight tracking-[-0.015em]">Doggy Grooming</h2>
+            <h2 class="text-[#111714] text-lg font-bold leading-tight tracking-[-0.015em]">Pet Grooming</h2>
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9">
@@ -32,11 +32,15 @@
               <a class="text-[#111714] text-sm font-medium leading-normal" href="#">Strumenti</a>
               <a class="text-[#111714] text-sm font-medium leading-normal" href="#">Contatti</a>
             </div>
-            <button
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span class="truncate">Prenota ora</span>
-            </button>
+            <div id="header-auth-buttons">
+              <!-- This div will be populated by js/auth.js -->
+              <a href="login.html" id="login-button-header" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]">
+                  <span class="truncate">Log In</span>
+              </a>
+              <a id="signup-button-header" href="register.html" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f0f4f2] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]" style="display: none;">
+                  <span class="truncate">Sign Up</span>
+              </a>
+            </div>
           </div>
         </header>
         <div class="px-40 flex flex-1 justify-center py-5">
@@ -57,11 +61,13 @@
                       Offriamo una vasta gamma di servizi per mantenere il tuo cane felice e in salute. Dai bagni ai tagli di capelli, abbiamo tutto ciò di cui hai bisogno.
                     </h2>
                   </div>
-                  <button
+                  <a
+                    id="hero-prenota-button"
+                    href="login.html" 
                     class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#38e07b] text-[#111714] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em]"
                   >
                     <span class="truncate">Prenota ora</span>
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -278,5 +284,6 @@
         </footer>
       </div>
     </div>
+    <script src="js/auth.js" defer></script>
   </body>
 </html>
