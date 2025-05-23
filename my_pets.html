@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pets - Pet Grooming</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        /* Basic styling for pet cards - can be expanded */
+        .pet-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: white;
+        }
+        .pet-card h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #111714;
+        }
+        .pet-card p {
+            color: #648772;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        .pet-card .actions button, .pet-card .actions a {
+            margin-right: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+        }
+        .edit-btn:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+        .delete-btn {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f1f4f2] px-10 py-3">
+                <div class="flex items-center gap-4 text-[#121714]">
+                    <div class="size-4"> <!-- Placeholder for logo -->
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor"></path></svg>
+                    </div>
+                    <h2 class="text-[#121714] text-lg font-bold leading-tight tracking-[-0.015em]">Pet Grooming</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8" id="header-auth-buttons">
+                    <!-- Auth buttons/links will be populated by js/auth.js -->
+                </div>
+            </header>
+
+            <main class="px-4 sm:px-6 lg:px-8 py-5 flex-1">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-[#121714] tracking-light text-3xl font-bold">My Pets</h1>
+                        <a href="add_pet.html" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] hover:bg-green-500 text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]">
+                            <span class="truncate">Add New Pet</span>
+                        </a>
+                    </div>
+                    <div id="message-div-my-pets" class="text-sm py-2"></div>
+                    <div id="pets-list-container">
+                        <!-- Pets will be listed here -->
+                        <p class="text-center text-gray-500">Loading your pets...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/auth.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const petsListContainer = document.getElementById('pets-list-container');
+            const messageDiv = document.getElementById('message-div-my-pets');
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            if (!user || !user.id) {
+                // This should ideally be caught by js/auth.js for protected pages,
+                // but as a fallback:
+                window.location.href = 'login.html';
+                return;
+            }
+            const userId = user.id;
+
+            async function fetchAndDisplayPets() {
+                petsListContainer.innerHTML = '<p class="text-center text-gray-500">Loading your pets...</p>'; // Reset
+                messageDiv.textContent = '';
+
+                try {
+                    const response = await fetch(`/api/pets?user_id=${userId}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to fetch pets.');
+                    }
+                    const pets = await response.json();
+
+                    if (pets.length === 0) {
+                        petsListContainer.innerHTML = '<p class="text-center text-gray-500">You haven\'t added any pets yet. <a href="add_pet.html" class="text-green-600 hover:underline">Add one now!</a></p>';
+                        return;
+                    }
+
+                    petsListContainer.innerHTML = ''; // Clear loading message
+                    pets.forEach(pet => {
+                        const petCard = document.createElement('div');
+                        petCard.className = 'pet-card';
+                        petCard.innerHTML = \`
+                            <h3>\${pet.name}</h3>
+                            <p><strong>Type:</strong> \${pet.type || 'N/A'}</p>
+                            <p><strong>Breed:</strong> \${pet.breed || 'N/A'}</p>
+                            <p><strong>Size:</strong> \${pet.size || 'N/A'}</p>
+                            <p><strong>Weight:</strong> \${pet.weight || 'N/A'}</p>
+                            <p><strong>Gender:</strong> \${pet.gender || 'N/A'}</p>
+                            <p><strong>Age:</strong> \${pet.age || 'N/A'}</p>
+                            <div class="actions mt-4">
+                                <a href="add_pet.html?edit_pet_id=\${pet.id}" class="edit-btn">Edit</a>
+                                <button data-pet-id="\${pet.id}" class="delete-btn">Delete</button>
+                            </div>
+                        \`;
+                        petsListContainer.appendChild(petCard);
+                    });
+
+                    // Add event listeners for delete buttons
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', async (event) => {
+                            const petIdToDelete = event.target.dataset.petId;
+                            if (confirm('Are you sure you want to delete this pet?')) {
+                                try {
+                                    const deleteResponse = await fetch(\`/api/pets/\${petIdToDelete}\`, {
+                                        method: 'DELETE',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ user_id: userId })
+                                    });
+                                    const deleteData = await deleteResponse.json();
+                                    if (deleteResponse.ok) {
+                                        messageDiv.textContent = deleteData.message || 'Pet deleted successfully.';
+                                        messageDiv.className = 'text-green-700 bg-green-100 border border-green-400 p-3 rounded-md my-2 text-center';
+                                        fetchAndDisplayPets(); // Refresh the list
+                                    } else {
+                                        throw new Error(deleteData.message || 'Failed to delete pet.');
+                                    }
+                                } catch (err) {
+                                    console.error('Delete error:', err);
+                                    messageDiv.textContent = err.message;
+                                    messageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2 text-center';
+                                }
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching pets:', error);
+                    // Use the messageDiv for displaying this error too, for consistency
+                    messageDiv.textContent = \`Error fetching pets: \${error.message}\`;
+                    messageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2 text-center';
+                    petsListContainer.innerHTML = ''; // Clear the "Loading..." message from container
+                }
+            }
+
+            fetchAndDisplayPets();
+        });
+    </script>
+</body>
+</html>

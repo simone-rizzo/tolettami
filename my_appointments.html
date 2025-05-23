@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - Pet Grooming</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        .appointment-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .appointment-card h3 {
+            font-size: 1.15rem; /* Slightly smaller than pet card name */
+            font-weight: bold;
+            color: #111714;
+        }
+        .appointment-card p {
+            color: #648772;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        .appointment-card .actions button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #ef4444; /* Red for cancel */
+            color: white;
+        }
+         .appointment-card .actions button:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f1f4f2] px-10 py-3">
+                <div class="flex items-center gap-4 text-[#121714]">
+                    <div class="size-4"> <!-- Placeholder for logo -->
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor"></path></svg>
+                    </div>
+                    <h2 class="text-[#121714] text-lg font-bold leading-tight tracking-[-0.015em]">Pet Grooming</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8" id="header-auth-buttons">
+                    <!-- Auth buttons/links will be populated by js/auth.js -->
+                </div>
+            </header>
+
+            <main class="px-4 sm:px-6 lg:px-8 py-5 flex-1">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-[#121714] tracking-light text-3xl font-bold">My Appointments</h1>
+                         <a href="book_appointment.html" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#38e07b] hover:bg-green-500 text-[#111714] text-sm font-bold leading-normal tracking-[0.015em]">
+                            <span class="truncate">Book New Appointment</span>
+                        </a>
+                    </div>
+                    <div id="message-div-my-appointments" class="text-sm py-2 text-center"></div>
+                    <div id="appointments-list-container">
+                        <p class="text-center text-gray-500">Loading your appointments...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/auth.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const appointmentsListContainer = document.getElementById('appointments-list-container');
+            const messageDiv = document.getElementById('message-div-my-appointments');
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            if (!user || !user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const userId = user.id;
+
+            async function fetchAndDisplayAppointments() {
+                appointmentsListContainer.innerHTML = '<p class="text-center text-gray-500">Loading your appointments...</p>';
+                messageDiv.textContent = '';
+
+                try {
+                    const response = await fetch(\`/api/appointments?user_id=\${userId}\`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to fetch appointments.');
+                    }
+                    const appointments = await response.json();
+
+                    if (appointments.length === 0) {
+                        appointmentsListContainer.innerHTML = '<p class="text-center text-gray-500">You have no upcoming appointments. <a href="book_appointment.html" class="text-green-600 hover:underline">Book one now!</a></p>';
+                        return;
+                    }
+
+                    appointmentsListContainer.innerHTML = ''; // Clear loading message
+                    appointments.forEach(app => {
+                        const appointmentCard = document.createElement('div');
+                        appointmentCard.className = 'appointment-card';
+                        appointmentCard.innerHTML = \`
+                            <h3>Service: \${app.service_name}</h3>
+                            <p><strong>Pet:</strong> \${app.pet_name}</p>
+                            <p><strong>Date:</strong> \${app.date}</p>
+                            <p><strong>Time:</strong> \${app.time}</p>
+                            <p><strong>Notes:</strong> \${app.notes || 'N/A'}</p>
+                            <div class="actions">
+                                <button data-appointment-id="\${app.id}" class="cancel-btn">Cancel Appointment</button>
+                            </div>
+                        \`;
+                        appointmentsListContainer.appendChild(appointmentCard);
+                    });
+
+                    // Add event listeners for cancel buttons
+                    document.querySelectorAll('.cancel-btn').forEach(button => {
+                        button.addEventListener('click', async (event) => {
+                            const appointmentIdToCancel = event.target.dataset.appointmentId;
+                            if (confirm('Are you sure you want to cancel this appointment?')) {
+                                try {
+                                    const cancelResponse = await fetch(\`/api/appointments/\${appointmentIdToCancel}\`, {
+                                        method: 'DELETE',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ user_id: userId }) 
+                                    });
+                                    const cancelData = await cancelResponse.json();
+                                    if (cancelResponse.ok) {
+                                        messageDiv.textContent = cancelData.message || 'Appointment canceled successfully.';
+                                        messageDiv.className = 'text-green-700 bg-green-100 border border-green-400 p-3 rounded-md my-2 text-center';
+                                        fetchAndDisplayAppointments(); // Refresh the list
+                                    } else {
+                                        throw new Error(cancelData.message || 'Failed to cancel appointment.');
+                                    }
+                                } catch (err) {
+                                    console.error('Cancel error:', err);
+                                    messageDiv.textContent = err.message;
+                                    messageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2 text-center';
+                                }
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching appointments:', error);
+                    // Use the messageDiv for displaying this error too, for consistency
+                    messageDiv.textContent = \`Error fetching appointments: \${error.message}\`;
+                    messageDiv.className = 'text-red-700 bg-red-100 border border-red-400 p-3 rounded-md my-2 text-center';
+                    appointmentsListContainer.innerHTML = ''; // Clear the "Loading..." message from container
+                }
+            }
+
+            fetchAndDisplayAppointments();
+        });
+    </script>
+</body>
+</html>
